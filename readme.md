@@ -26,6 +26,14 @@ https://1drv.ms/b/s!AgkjWRgK41qpySTEOKGs--ShxBVr
 ----------------------------------------------------------------------------------------------------------------------------------------
 # Updating History
 
+- 02/25/2019:
+
+   - [X] Preface Part
+   
+   - [X] Skill 1.1
+   
+   - [X] Skill 1.2
+
 
 
 
@@ -138,14 +146,52 @@ e. Some Places That T-SQL Dose Not Follow These Theories
     - And then do some aggregations, based on one or more fields
   - HAVING
     - Filter again, cut part of the records
-    - **REMEMBER**: any filter after the GROUP BY shall use HAVING rather than WHERE
+    - **REMEMBER!** any filter after the GROUP BY shall use HAVING rather than WHERE
   - SELECT
     - And cut part of the fields
   - ORDER BY
     - We already get all the records we want, just change their order if we want.
     - **REMEMBER!** ORDER BY is the only clause that all refer to the aliases (new names after AS) that defined in the SELECT clause, because it's the only clause that run after SELECT.
     
-### 1.1.2 Understanding Logical Query Processing
+### 1.1.3 Some Details of Each Clause
+a. FROM
+   - We can define aliases for tables in FROM clause
+   
+   ```
+   SELECT a
+   FROM A AS B;
+   ```
+  
+b. SELECT
+   - We can define aliases for fields in SELECT clause
+   
+   ```
+   SELECT a AS b
+   FROM A;
+   ```
+   
+   - We can add simple calculation expression in SELECT clause
+   
+   ```
+   SELECT empid, firstname + N' ' + lastname as a
+   FROM A;
+   ```
+   
+   - We can assign no name to a field
+   
+   ```
+   SELECT empid, firstname + N' ' + lastname
+   FROM A;
+   ```
+   
+   - We can SELECT without FROM (dosen't work on Standard SQL)
+   
+   ```
+   SELECT 10 AS a, 'ABC' as b ;
+   ```
+   
+   - **REMEMBER!** the rules of delimiting identifiers could be complex. If we find any error on aliase, just use [] to include the aliase to solve the error.
+   
   
 
 
