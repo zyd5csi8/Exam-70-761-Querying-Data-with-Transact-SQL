@@ -191,7 +191,24 @@ b. SELECT
    ```
    
    - **REMEMBER!** the rules of delimiting identifiers could be complex. If we find any error on aliase, just use [] to include the aliase to solve the error.
-   
+  
+c. Where & Having: Filtering Data with Predicates
+   - Predicates and Three-Valued_logic
+     - 2 or 3 values?
+       - Two-Values-Logic: True or False
+       - Three-Values-Logic: True or False or Null
+     - All logic test inclufing Null will be "False"
+     - There are differences in same logic test between 2-value and 3 value:
+       - 2-value: 
+       ```
+       a <> N'A';
+       ```
+       - 3-value: 
+       ```a <> N'A' AND x IS NOT NULL;
+       ```
+      - (PS: 'N' is limitted the input string to be **unicode character**. i.e. formate as nchar or nvarchar, not char or varchar.)
+      
+   - Combining Predicates:
   
 
 
