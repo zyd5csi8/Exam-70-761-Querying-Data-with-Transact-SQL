@@ -1,4 +1,4 @@
-# Exam 70-768: Developing SQL Data Models
+# Exam 70-761: Querying Data with Transact-SQL
 
 This is the first part of certification: **MCSA: SQL 2016 BI Development**. It could be a good way to apprrove your ability to write advanced, highly optimized SQL queries to retrieve large volume data. Comparing to it's precedemt exam **70-461: Querying Microsoft SQL Server 2012** , the exam 70-768 has cutted a large part of the content that is too complext and unlikely to be used by most DA or BA. Therefore, pass exam 70-768 will be relatively easier.
 
@@ -50,6 +50,8 @@ Here is some details of this exam:
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 # 7.XML
+
+主要考点：记住特点，记住主要options。
 
 - XML特点：
 
@@ -222,11 +224,195 @@ Here is some details of this exam:
   ```
   <row><EmpID>1</EmpID><FirstName>John</FirstName>...
   ```
+----------------------------------------------------------------------------------------------------------------------------------------
+
+# 8.Json
+
+特点：
+
+- Used to exchange data between web pages and web server by using AJAX calls, using REST endpoint.
+
+- In data exchange format
+
+- Text based and lightweighted.
+
+For [JSON Auto](https://database.guide/sql-server-for-json-auto-examples-t-sql/) 和 [For JSON Path](https://database.guide/sql-server-for-json-path-examples-t-sql/)区别不大。
 
 
+  例1：单表
 
+  ```
+USE Music;
+SELECT TOP 3 AlbumName, ReleaseDate
+FROM Albums
+FOR JSON AUTO;
+  ```
 
+  将会返回：
 
+  ```
+[
+    {
+        "AlbumName": "Powerslave",
+        "ReleaseDate": "1984-09-03"
+    },
+    {
+        "AlbumName": "Powerage",
+        "ReleaseDate": "1978-05-05"
+    },
+    {
+        "AlbumName": "Singing Down the Lane",
+        "ReleaseDate": "1956-01-01"
+    }
+]
+  ```
+  
+  例2：多表
+
+  ```
+USE Music;
+SELECT TOP 2 ArtistName,
+    (SELECT AlbumName 
+        FROM Albums
+        WHERE Artists.ArtistId = Albums.ArtistId
+        FOR JSON PATH) AS Albums
+FROM Artists
+ORDER BY ArtistName
+FOR JSON PATH;
+  ```
+
+  将会返回：
+
+  ```
+[
+    {
+        "ArtistName": "AC/DC",
+        "Albums": [
+            {
+                "AlbumName": "Powerage"
+            }
+        ]
+    },
+    {
+        "ArtistName": "Allan Holdsworth",
+        "Albums": [
+            {
+                "AlbumName": "All Night Wrong"
+            },
+            {
+                "AlbumName": "The Sixteen Men of Tain"
+            }
+        ]
+    }
+]
+  ```
+
+几个选项：
+
+- ROOT:在最上面加上一个标题 （top Level member)
+
+  例3：
+
+  ```
+  USE Music;
+  SELECT TOP 3
+    ArtistName, 
+    AlbumName
+  FROM Artists
+    INNER JOIN Albums
+      ON Artists.ArtistId = Albums.ArtistId
+  ORDER BY ArtistName
+  FOR JSON AUTO, ROOT('Music');
+  ```
+
+  将会返回：
+
+  ```
+  {
+      "Music": [
+          {
+              "ArtistName": "AC/DC",
+              "Albums": [
+                  {
+                      "AlbumName": "Powerage"
+                  }
+              ]
+          },
+          {
+              "ArtistName": "Allan Holdsworth",
+              "Albums": [
+                  {
+                      "AlbumName": "All Night Wrong"
+                  },
+                  {
+                      "AlbumName": "The Sixteen Men of Tain"
+                  }
+              ]
+          }
+      ]
+  }
+  ```
+
+- INCLUDE_NULL_VALUES: 在结果中包含NULLs.
+
+  例4:
+
+  ```
+  SELECT c.custid AS [Customer.Id],
+  c.companyname AS [Customer.Name],
+  o.orderid AS [Customer.Order.Id],
+  o.orderdate AS [Customer.Order.Date],
+  NULL AS [Customer.Order.Delivery]
+  FROM Sales.Customers AS c
+  INNER JOIN Sales.Orders AS o
+  ON c.custid = o.custid
+  WHERE c.custid = 1
+  AND o.orderid = 10692
+  ORDER BY c.custid, o.orderid
+  FOR JSON PATH,
+  WITHOUT_ARRAY_WRAPPER,
+  INCLUDE_NULL_VALUES;
+  ```
+
+  将会返回：
+
+  ```
+  {
+   "Customer":{
+    "Id":1,
+    "Name":"Customer NRZBB",
+    "Order":{
+      "Id":10692,
+      "Date":"2015-10-03",
+      "Delivery":null
+      }
+    }
+  }
+  ```
+
+- WITHOUT_ARRAY_WRAPPER: 将会把[]去掉。
+
+  例5:
+
+  ```
+  USE Music;
+  SELECT TOP 1 
+    AlbumName, 
+    ReleaseDate
+  FROM Albums
+  FOR JSON AUTO, WITHOUT_ARRAY_WRAPPER;
+  ```
+
+  将会返回：
+
+  ```
+  {
+      "AlbumName": "Powerslave",
+      "ReleaseDate": "1984-09-03"
+  }
+  ```
+
+----------------------------------------------------------------------------------------------------------------------------------------
 
 
 
