@@ -23,33 +23,115 @@ Here is some details of this exam:
 ----------------------------------------------------------------------------------------------------------------------------------------
 # Content
 
-1. SQL Query Basic
+- [ ] 1. SQL Query Basic
 
-2. Subquery & Apply
+ - SELECT组成部分及运行顺序。
+ 
+ - 每部分细节
 
-3. Table Expression, Temporary Tables & CTE
+- [ ] 2. JOIN的使用
 
-4. Grouping Sets
+- [ ] 3. Set运行符的使用
 
-5. Pivot & Unpivot
+- [ ] 4. 常见functions
 
-6. Temporal Data and versioning
+- [ ] 5. DML常见语句
 
-7. XML
+ - RETURN的使用
 
-8. Json
+- [ ] 6 Subquery使用
 
-8. Views, UDF & Stored Procedures
+- [ ] 7. APPLY使用
 
-9. Transaction Handling & Error Handling
+- [ ] 8. Derived Tablea & CTEs
 
-10. Data Type Transfering & Nulls
+- [ ] 9. Aggregating & Grouping Sets
 
+- [ ] 10. Pivot & Unpivot
+
+- [ ] 11. Window Functions
+
+- [ ] 12. System Versioned Temporal Table
+
+- [x] 13. XML
+
+- [x] 14. JSON
+
+- [ ] 15. Views
+
+- [ ] 16. UDF
+
+- [ ] 17. Stored Procedures
+
+- [ ] 18. Transactions
+
+- [ ] 19. Try-Catch结构
+
+- [ ] 20. Data Types & Nulls
+
+----------------------------------------------------------------------------------------------------------------------------------------
+# 1. SQL Query Basic
+
+- SELECT语句书写顺序：
+
+  1. SELECT
+  
+  2. FROM
+  
+  3.WHERE
+  
+  4. GROUP BY
+  
+  5. HAVING
+  
+  6. ORDER BY
+  
+- SELECT语句书写顺序：
+
+**FROM - WHERE - GROUP BY - HAVING - SELECT - ORDER BY**
+
+  1. FROM: 从哪几个表中拉取全部数据。
+  
+  - 可以对表进行暂时命名：
+  
+  ```
+  SELECT E.empid, firstname, lastname, country
+  FROM HR.Employees AS E;
+  ```
+  
+  2. WHERE：根据条件筛去一部分数据。
+  
+  3. GROUP BY：运行aggregating
+  
+  4. HAVING：在aggregation的结果上，再次根据条件筛去一部分数据。
+  
+    - HAVING部分只可以写aggregate function的条件
+  
+  5. SELECT：进行column层面的运算，并改名。
+  
+  - 可以直接使用 + 连接strings
+  
+  ```
+  SELECT empid, firstname + N' ' + lastname
+  FROM HR.Employees;
+  ```
+  
+    - 注意：如果中间任意一段是Null，得到的结果将是Null
+    
+ - 可以不写FROM，直接SELECT （T-SQL特殊功能）
+ 
+ ```
+ SELECT 10 AS col1, 'ABC' AS col2;
+ ```
+  
+  6. ORDER BY：排序，然后输出
+  
+    - 因为ORDER BY在SELECT后面运行，所以可以使用SELECT中更改的aliases.
 
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------
-# 7.XML
+# 13.XML
 
 主要考点：记住特点，记住主要options。
 
@@ -226,7 +308,7 @@ Here is some details of this exam:
   ```
 ----------------------------------------------------------------------------------------------------------------------------------------
 
-# 8.JSON
+# 14.JSON
 
 特点：
 
