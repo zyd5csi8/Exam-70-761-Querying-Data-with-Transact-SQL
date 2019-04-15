@@ -25,9 +25,9 @@ Here is some details of this exam:
 
 - [ ] 1. SQL Query Basic
 
-       - SELECT组成部分及运行顺序。
+  - SELECT组成部分及运行顺序。
  
-       - 每部分细节
+  - 每部分细节
 
 - [ ] 2. JOIN的使用
 
@@ -37,7 +37,7 @@ Here is some details of this exam:
 
 - [ ] 5. DML常见语句
 
-      - RETURN的使用
+  - RETURN的使用
 
 - [ ] 6 Subquery使用
 
@@ -92,7 +92,7 @@ Here is some details of this exam:
 
   1. FROM: 从哪几个表中拉取全部数据。
   
-     - 可以对表进行暂时命名：
+   > 可以对表进行暂时命名：
   
      ```
      SELECT E.empid, firstname, lastname, country
@@ -105,11 +105,11 @@ Here is some details of this exam:
   
   4. HAVING：在aggregation的结果上，再次根据条件筛去一部分数据。
   
-     - HAVING部分只可以写aggregate function的条件
+   > HAVING部分只可以写aggregate function的条件
   
   5. SELECT：进行column层面的运算，并改名。
   
-     - 可以直接使用 + 连接strings
+   > 可以直接使用 + 连接strings
 
      ```
      SELECT empid, firstname + N' ' + lastname
@@ -118,7 +118,7 @@ Here is some details of this exam:
   
      - 注意：如果中间任意一段是Null，得到的结果将是Null
     
- - 可以不写FROM，直接SELECT （T-SQL特殊功能）
+  > 可以不写FROM，直接SELECT （T-SQL特殊功能）
  
     ```
     SELECT 10 AS col1, 'ABC' AS col2;
@@ -126,7 +126,7 @@ Here is some details of this exam:
   
   6. ORDER BY：排序，然后输出
   
-    - 因为ORDER BY在SELECT后面运行，所以可以使用SELECT中更改的aliases.
+    > 因为ORDER BY在SELECT后面运行，所以可以使用SELECT中更改的aliases.
 
 
 
