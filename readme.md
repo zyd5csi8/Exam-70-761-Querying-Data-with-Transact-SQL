@@ -23,7 +23,7 @@ Here is some details of this exam:
 ----------------------------------------------------------------------------------------------------------------------------------------
 # Content
 
-- [ ] 1. SQL Query Basic
+- [X] 1. SQL Query Basic
 
   - SELECT组成部分及运行顺序。
  
@@ -92,24 +92,99 @@ Here is some details of this exam:
 
   1. FROM: 从哪几个表中拉取全部数据。
   
-   > 可以对表进行暂时命名：
+    - 可以对表进行暂时命名：
   
      ```
      SELECT E.empid, firstname, lastname, country
      FROM HR.Employees AS E;
      ```
+    
+    - 当名字不符合命名要求的时候，用[]将名字括起来就可以了。
   
   2. WHERE：根据条件筛去一部分数据。
+  
+    - 二值逻辑和三值逻辑
+    
+      - 二值逻辑： T or F
+      
+      - 三值逻辑： T or F or Null
+      
+        - 和Null相关的一切逻辑运算都会返回Null
+        
+        - 三值逻辑运算需要将input消除Null，或者考虑Null存在的条件。例如：
+        
+        ```
+        SELECT empid, firstname, lastname, country, region, city
+        FROM HR.Employees
+        WHERE ISNULL(region, N'WA') <> N'WA';
+        ```
+        
+        或者：
+        
+        ```
+        SELECT empid, firstname, lastname, country, region, city
+        FROM HR.Employees
+        WHERE region <> N'WA'
+        OR region IS NULL;
+        ```
+        
+    - 多个条件的运行顺序
+    
+      - NOT优先于AND，优先于OR
+      
+      - 使用()来设置运行顺序。
+      
+    - 对不同类型的数据进行筛选：
+    
+      - 可以使用CAST（失败终止）或者TRY_CAST（失败返回NULL）来更改数据类型。
+    
+      - STRING
+      
+        - N将format设置为nchar / nvarchar (unicode),有可能提高运行效率。
+        
+        - LIKE的使用：对目标进行pattern比较
+        
+        ```
+        SELECT empid, firstname, lastname
+        FROM HR.Employees
+        WHERE lastname LIKE N'D%';
+        ```
+        
+          - %为N个字符
+          
+          - _ 为1个字符
+          
+          - 使用ESCAPE或者[]来指代%或_
+          
+          ```
+          LIKE '!_%' ESCAPE'!';
+          
+          LIKE [_%];
+          ```
+        
+      - TIME
+      
+        - 常写作 “2000-10-10”格式
+        
+        - 写作LN格式 "20001010"可以免除不同国家的格式限制。
+        
+        - 可以进行逻辑运算，且date和date time可以写在一起。
+        
+          ```
+          SELECT orderid, orderdate, empid, custid
+          FROM Sales.Orders2
+          WHERE orderdate BETWEEN '20160401' AND '20160430 23:59:59.999';
+          ```
   
   3. GROUP BY：运行aggregating
   
   4. HAVING：在aggregation的结果上，再次根据条件筛去一部分数据。
   
-   > HAVING部分只可以写aggregate function的条件
+    - HAVING部分只可以写aggregate function的条件
   
   5. SELECT：进行column层面的运算，并改名。
   
-   > 可以直接使用 + 连接strings
+    - 可以直接使用 + 连接strings
 
      ```
      SELECT empid, firstname + N' ' + lastname
@@ -118,7 +193,7 @@ Here is some details of this exam:
   
      - 注意：如果中间任意一段是Null，得到的结果将是Null
     
-  > 可以不写FROM，直接SELECT （T-SQL特殊功能）
+   - 可以不写FROM，直接SELECT （T-SQL特殊功能）
  
     ```
     SELECT 10 AS col1, 'ABC' AS col2;
@@ -126,7 +201,73 @@ Here is some details of this exam:
   
   6. ORDER BY：排序，然后输出
   
-    > 因为ORDER BY在SELECT后面运行，所以可以使用SELECT中更改的aliases.
+    - 因为ORDER BY在SELECT后面运行，所以可以使用SELECT中更改的aliases.
+    
+    - ORDER 可以设置DESC或者ASC，默认ASC。
+    
+    - 可以根据多列来排序，并且分别设置排序顺序。
+      
+      ```
+      SELECT empid, firstname, lastname, city, MONTH(birthdate) AS birthmonth
+      FROM HR.Employees
+      WHERE country = N'USA' AND region = N'WA'
+      ORDER BY city ASC, empid DESC;
+      ```
+    
+    - 可以根据列的位置序号来指定列。
+    
+      ```
+      SELECT empid, city, firstname, lastname, MONTH(birthdate) AS birthmonth
+      FROM HR.Employees
+      WHERE country = N'USA' AND region = N'WA'
+      ORDER BY 4, 1; - birthmonth & empid
+      ```
+      
+    - Nulls将永远置于一列的顶端。
+    
+    - 无order by将返回relational result，即运行速度最快的顺序。此顺序不保证不会改变。
+    
+    - TOP的使用：
+      
+      - 不是Standard Content
+    
+      - 用于输出最上面的某几个records
+      
+      ```
+      SELECT TOP (3) orderid, orderdate, custid, empid
+      FROM Sales.Orders
+      ORDER BY orderdate DESC;
+      ```
+      
+      - 可以使用TOP(N) PERCENT来基于%rank选择
+      
+      - 可以使用TOP(N) ColumnA WITH TIRES 来选择所有rank相同的结果。（即使只选择TOP 2，若有10个目标并列也会全部输出）。
+      
+      - ORDER BY (SELECT NULL)来表示返回relational result （用于指明默认排序，没有实际作用）。
+      
+    - OFFSET-FETCH的使用
+    
+      - TOP的标准语句版本
+      
+      - 有NEXT和FIRST两个选项：消去0行用FIRST，消去N行用NEXT
+      
+      ```
+      SELECT orderid, orderdate, custid, empid
+      FROM Sales.Orders
+      ORDER BY orderdate DESC, orderid DESC
+      OFFSET 0 ROWS FETCH FIRST 25 ROWS ONLY;
+
+
+      SELECT orderid, orderdate, custid, empid
+      FROM Sales.Orders
+      ORDER BY orderdate DESC, orderid DESC
+      OFFSET 50 ROWS FETCH NEXT 25 ROWS ONLY;
+      
+      ```
+      
+      - **可以只写OFFSET。但写FETCH就必须要有OFFSET**。
+      
+
 
 
 
