@@ -29,15 +29,11 @@ Here is some details of this exam:
  
   - 每部分细节
 
-- [ ] 2. JOIN的使用
+- [X] 2. JOIN的使用
 
-- [ ] 3. Set运行符的使用
-
-- [ ] 4. 常见functions
+- [X] 3. Set运行符的使用
 
 - [ ] 5. DML常见语句
-
-  - RETURN的使用
 
 - [ ] 6 Subquery使用
 
@@ -68,6 +64,8 @@ Here is some details of this exam:
 - [ ] 19. Try-Catch结构
 
 - [ ] 20. Data Types & Nulls
+
+- [ ] 4. 常见functions
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 # 1. SQL Query Basic
@@ -175,6 +173,36 @@ Here is some details of this exam:
           FROM Sales.Orders2
           WHERE orderdate BETWEEN '20160401' AND '20160430 23:59:59.999';
           ```
+    - WHERE中的优化
+    
+      - 不使用FUNCTION比使用FUNCTION好
+      
+      - 别把整列放入function中
+      
+        - 把一个常数或者variable放进去
+        
+        - 使用LIKE运行符
+        
+      - 当NULL存在时，使用 两个逻辑比较 将会优于使用 一个带有function的逻辑比较。
+      
+        ```
+        A优于B：
+        
+        A:
+        SELECT orderid, shippeddate
+        FROM Sales.Orders
+        WHERE ISNULL(shippeddate, '99991231') = ISNULL(@dt, '99991231');
+        
+        
+        B:
+        SELECT orderid, shippeddate
+        FROM Sales.Orders
+        WHERE shippeddate = @dt
+        OR (shippeddate IS NULL AND @dt IS NULL);
+        ```
+      
+      - 尝试使用WHERE EXIST语句来优化query
+      
   
   3. GROUP BY：运行aggregating
   
@@ -267,6 +295,181 @@ Here is some details of this exam:
       
       - **可以只写OFFSET。但写FETCH就必须要有OFFSET**。
       
+----------------------------------------------------------------------------------------------------------------------------------------
+# 2. JOIN的使用
+
+  - Cross JOIN
+  
+  N JOIN M Return N x M
+  
+  Self Join 同理。
+  
+  ```
+  A (Cross) JOIN B; - 不需要写KEY.
+  ```
+  
+  - INNER JOIN
+  
+    - A和B都有才有。
+    
+    - 最好根据一列unique key连接，不然会产生重复 (foreign key-unique key relationship).
+    
+    - 千万不要尝试使用WHERE的条件来代替INNER JOIN.
+    
+  - Outer JOIN
+  
+    - 未匹配成功的部分返回NULL
+    
+    - Left Outer JOIN：左全
+    
+      - 反选套路：
+      
+      ```
+      A Left JOIN B on A.key = B.key WHERE b.key IS NULL
+      ```
+     
+    - Right Outer JOIN: 右全
+    
+      - 反选套路：
+      
+      ```
+      B Right JOIN A on B.key = A.key WHERE B.key IS NULL
+      ```
+      
+     - Full Outter JOIN: 左右全
+     
+     ```
+     A Full Outter JOIN B on A.key = B.key
+     ```
+  
+ - Composite Join
+ 
+  根据多个键的单个JOIN。
+  
+  例如：
+  
+  ```
+  SELECT EL.country, EL.region, EL.city, EL.numemps, CL.numcusts
+  FROM dbo.EmpLocations AS EL
+  INNER JOIN dbo.CustLocations AS CL
+  ON EL.country = CL.country
+  AND EL.region = CL.region
+  AND EL.city = CL.city;
+  ```
+  
+  在join中如果涉及NULL，千万不可以尝试在JOIN中将NULL换掉，将会使效率降低。应该使用三值运算来处理NULLs：
+  
+  ```
+  SELECT EL.country, EL.region, EL.city, EL.numemps, CL.numcusts
+  FROM dbo.EmpLocations AS EL
+  INNER JOIN dbo.CustLocations AS CL
+  ON EL.country = CL.country
+  AND (EL.region = CL.region OR (EL.region IS NULL AND CL.region IS NULL))
+  AND EL.city = CL.city;
+  ```
+  
+  - 使用Merge Join优化
+  
+    - 普通optimizer一般会选择nested loops strategy来进行join，适合小数据量的JOIN。
+    
+    - 可以手动设置Merge JOIN来优化性能，适合数据量大的JOIN。原理为从JOIN的两端同时开始运行。
+    
+      ```
+      SELECT EL.country, EL.region, EL.city, EL.numemps, CL.numcusts
+      FROM dbo.EmpLocations AS EL
+      INNER MERGE JOIN dbo.CustLocations AS CL
+      ON EL.country = CL.country
+      AND (EL.region = CL.region OR (EL.region IS NULL AND CL.region IS NULL))
+      AND EL.city = CL.city;
+      ```
+      
+ - Multi-join queries 多个表JOIN在一起
+ 
+   - 最好给每个表命名：
+   
+    ```
+    SELECT
+    S.companyname AS supplier, S.country,
+    P.productid, P.productname, P.unitprice,
+    C.categoryname
+    FROM Production.Suppliers AS S
+    LEFT OUTER JOIN Production.Products AS P
+    ON S.supplierid = P.supplierid
+    INNER JOIN Production.Categories AS C
+    ON C.categoryid = P.categoryid
+    WHERE S.country = N'Japan';
+    ```
+    
+   - 每个JOIN都处于平行位置，将会从左到右来运算。可以使用()来改变运算顺序。
+   
+----------------------------------------------------------------------------------------------------------------------------------------
+
+# 4.SET运行符的使用。
+
+一共有四个SET运行符。要求使用时，两边的列名字一样，数据类型一样。
+
+运行顺序为：INTERSECT优先于UNION和EXCEPT，后两者平行。
+
+  - UNION
+  
+    - 将两边的数据合并在一起
+    
+    - 将会消除duplicate 和NULLs
+  
+  ```
+  SELECT country, region, city
+  FROM HR.Employees
+  UNION
+  SELECT country, region, city
+  FROM Sales.Customers;
+  ```
+  
+  - UNION ALL
+  
+    - 将两边的数据合并在一起
+    
+    - 将会保留duplicate 和NULLs
+    
+    - 会对每个record进行duplicate和NULLs的测试，会使性能降低。
+  
+  ```
+  SELECT country, region, city
+  FROM HR.Employees
+  UNION ALL
+  SELECT country, region, city
+  FROM Sales.Customers;
+  ```
+  
+  - INTERSECT
+  
+    - 得到A，B重合的部分
+    
+    - 将会比较所有列的所有records
+    
+    - 只会返回一遍
+  
+    ```
+    SELECT country, region, city
+    FROM HR.Employees
+    INTERSECT
+    SELECT country, region, city
+    FROM Sales.Customers;
+    ```
+  
+ - Except
+ 
+   - 用于反选，得到存在于A但是不存在于B中的内容。
+   
+    ```
+    SELECT country, region, city
+    FROM HR.Employees
+    INTERSECT
+    SELECT country, region, city
+    FROM Sales.Customers;
+    ```
+
+----------------------------------------------------------------------------------------------------------------------------------------
+# 5. DML常见语句
 
 
 
